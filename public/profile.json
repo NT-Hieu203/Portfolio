@@ -1,7 +1,7 @@
 {
   "name": "Nguyễn Thanh Hiếu",
-  "title": "Lecturer / Researcher in Your Field",
-  "affiliation": "Your Current University, Ho Chi Minh City, Vietnam",
+  "title": "Master's Student in Computer Science",
+  "affiliation": "University of Science - VNUHCM, Ho Chi Minh City, Vietnam",
   "email": "nt.hieu10603@gmail.com",
   "orcid": "0009-0007-8866-0087",
   "interests": ["Research topic one", "Research topic two", "Research topic three"],
@@ -9,20 +9,5 @@
     { "label": "Google Scholar", "url": "https://scholar.google.com/" },
     { "label": "LinkedIn", "url": "https://www.linkedin.com/" }
   ],
-  "awards": [
-    {
-      "title": "Best Paper Award",
-      "org": "Tên hội nghị hoặc tổ chức trao giải",
-      "year": "2025",
-      "note": "Mô tả ngắn (không bắt buộc).",
-      "image": "images/awards/award-1.jpg"
-    },
-    {
-      "title": "Outstanding Student Researcher",
-      "org": "Tên trường hoặc tổ chức",
-      "year": "2024",
-      "note": "",
-      "image": "images/awards/award-2.jpg"
-    }
-  ]
+  "awards": []
 }

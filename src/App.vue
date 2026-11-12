@@ -15,6 +15,9 @@ const avatarFailed = ref(false)
 const failedImages = ref(new Set())
 const pubPage = ref(1)
 const awardPage = ref(1)
+const distinctions = ref([]) // lấy từ ORCID
+const educations = ref([]) // lấy từ ORCID
+const affLoaded = ref(false)
 
 const assetUrl = (path) => base + path
 
@@ -112,8 +115,33 @@ const chart = computed(() => {
   return { bars, top }
 })
 
-/* ---------- Achievements (profile.json) ---------- */
-const awards = computed(() => profile.value?.awards || [])
+/* ---------- Achievements + Education: nội dung từ ORCID, ảnh từ profile.json ---------- */
+const startYear = (x) => Number(x.start || x.end || 0)
+
+// profile.awards = [{ id: <put-code ORCID>, image_path }]
+const imageById = computed(() =>
+  Object.fromEntries((profile.value?.awards || []).map((a) => [String(a.id), a.image_path]))
+)
+const awards = computed(() =>
+  [...distinctions.value]
+    .sort((a, b) => startYear(b) - startYear(a))
+    .map((d) => ({
+      id: d.id,
+      title: d.title || d.dept || 'Distinction',
+      note: d.title ? d.dept : '',
+      org: d.org,
+      year: d.start,
+      image: imageById.value[d.id] || '',
+    }))
+)
+const sortedEducations = computed(() =>
+  [...educations.value].sort((a, b) => startYear(b) - startYear(a))
+)
+function period(e) {
+  if (!e.start && !e.end) return ''
+  if (!e.end) return `${e.start} – present`
+  return e.start && e.start !== e.end ? `${e.start} – ${e.end}` : e.end
+}
 const pagedAwards = computed(() =>
   awards.value.slice((awardPage.value - 1) * PAGE_SIZE, awardPage.value * PAGE_SIZE)
 )
@@ -156,11 +184,49 @@ async function loadWorks(orcid) {
   }
 }
 
+// Distinctions (giải thưởng) và Educations (học vấn) có cùng cấu trúc trả về
+function parseAffiliations(data, kind) {
+  const groups = data['affiliation-group'] || data.group || []
+  return groups
+    .map((g) => {
+      const s = g.summaries?.[0]
+      const item = s?.[`${kind}-summary`] || Object.values(s || {})[0]
+      if (!item) return null
+      return {
+        id: String(item['put-code']),
+        title: item['role-title'] || '',
+        dept: item['department-name'] || '',
+        org: item.organization?.name || '',
+        start: item['start-date']?.year?.value || '',
+        end: item['end-date']?.year?.value || '',
+      }
+    })
+    .filter(Boolean)
+}
+
+async function loadAffiliations(orcid) {
+  const get = async (kind, path) => {
+    try {
+      const res = await fetch(`https://pub.orcid.org/v3.0/${orcid}/${path}`, {
+        headers: { Accept: 'application/json' },
+      })
+      return res.ok ? parseAffiliations(await res.json(), kind) : []
+    } catch {
+      return []
+    }
+  }
+  const [d, e] = await Promise.all([get('distinction', 'distinctions'), get('education', 'educations')])
+  distinctions.value = d
+  educations.value = e
+  affLoaded.value = true
+}
+
 onMounted(async () => {
   const res = await fetch(assetUrl('profile.json'))
   profile.value = await res.json()
   document.title = `${profile.value.name} | Academic Portfolio`
   loadWorks(profile.value.orcid)
+  loadAffiliations(profile.value.orcid)
 })
 </script>
 
@@ -249,7 +315,9 @@ onMounted(async () => {
           <!-- Thành tích / giải thưởng (có hình) -->
           <section id="achievements">
             <h2>Achievements</h2>
-            <div v-for="a in pagedAwards" :key="a.title + a.year + a.image" class="award">
+            <p v-if="!affLoaded" class="state">Loading achievements…</p>
+            <p v-else-if="!awards.length" class="state">No public distinctions found on ORCID.</p>
+            <div v-for="a in pagedAwards" :key="a.id" class="award">
               <div class="thumb">
                 <img
                   v-if="a.image && !failedImages.has(a.image)"
@@ -258,11 +326,11 @@ onMounted(async () => {
                   loading="lazy"
                   @error="markImageFailed(a.image)"
                 />
-                <span v-else aria-hidden="true">{{ a.year }}</span>
+                <span v-else aria-hidden="true">{{ a.year || '•' }}</span>
               </div>
               <div>
                 <h3>{{ a.title }}</h3>
-                <p>{{ a.org }}, {{ a.year }}</p>
+                <p>{{ [a.org, a.year].filter(Boolean).join(', ') }}</p>
                 <p v-if="a.note">{{ a.note }}</p>
               </div>
             </div>
@@ -282,6 +350,17 @@ onMounted(async () => {
               </div>
               <div class="ylab"><span>{{ chart.top }}</span><span>{{ chart.top / 2 }}</span><span>0</span></div>
             </div>
+          </div>
+          <div v-if="sortedEducations.length" class="blk">
+            <h2>Education</h2>
+            <ul class="edu">
+              <li v-for="e in sortedEducations" :key="e.id">
+                <b>{{ e.title || e.dept }}</b>
+                <span v-if="e.title && e.dept">{{ e.dept }}</span>
+                <span>{{ e.org }}</span>
+                <span v-if="period(e)">{{ period(e) }}</span>
+              </li>
+            </ul>
           </div>
           <div class="blk">
             <h2>Profiles</h2>
@@ -390,6 +469,9 @@ aside h2 { font-size: 1.15rem; }
 aside .blk { margin-bottom: 32px; }
 aside ul { list-style: none; margin: 8px 0 0; padding: 0; }
 aside li { padding: 5px 0; font-size: 0.95rem; }
+.edu li { display: block; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.edu b { display: block; font-weight: 600; }
+.edu span { display: block; font-size: 0.9rem; color: var(--muted); }
 .chart { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 14px; height: 190px; }
 .plot { display: flex; gap: 6px; }
 .col { flex: 1; display: flex; flex-direction: column; min-width: 0; }

@@ -4,9 +4,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/sync-awards.mjs && vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync": "node scripts/sync-awards.mjs"
   },
   "dependencies": {
     "vue": "^3.5.13"
@@ -15,4 +16,5 @@
     "@vitejs/plugin-vue": "^5.2.1",
     "vite": "^6.0.0"
   }
+  
 }
