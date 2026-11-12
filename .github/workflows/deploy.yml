@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-            - name: Sync awards from ORCID
+      - name: Sync awards from ORCID
         run: npm run sync
       - name: Commit new awards
         run: |
