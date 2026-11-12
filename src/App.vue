@@ -222,7 +222,7 @@ async function loadAffiliations(orcid) {
 }
 
 onMounted(async () => {
-  const res = await fetch(assetUrl('profile.json'))
+  const res = await fetch(assetUrl('profile.json'), { cache: 'no-cache' })
   profile.value = await res.json()
   document.title = `${profile.value.name} | Academic Portfolio`
   loadWorks(profile.value.orcid)

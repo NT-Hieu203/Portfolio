@@ -4,10 +4,25 @@
   "affiliation": "University of Science - VNUHCM, Ho Chi Minh City, Vietnam",
   "email": "nt.hieu10603@gmail.com",
   "orcid": "0009-0007-8866-0087",
-  "interests": ["Research topic one", "Research topic two", "Research topic three"],
-  "links": [
-    { "label": "Google Scholar", "url": "https://scholar.google.com/" },
-    { "label": "LinkedIn", "url": "https://www.linkedin.com/" }
+  "interests": [
+    "Research topic one",
+    "Research topic two",
+    "Research topic three"
   ],
-  "awards": []
+  "links": [
+    {
+      "label": "Google Scholar",
+      "url": "https://scholar.google.com/"
+    },
+    {
+      "label": "LinkedIn",
+      "url": "https://www.linkedin.com/"
+    }
+  ],
+  "awards": [
+    {
+      "id": "40562961",
+      "image_path": ""
+    }
+  ]
 }
