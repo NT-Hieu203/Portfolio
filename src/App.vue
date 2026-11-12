@@ -362,13 +362,13 @@ onMounted(async () => {
               </li>
             </ul>
           </div>
-          <div class="blk">
+          <!-- <div class="blk">
             <h2>Profiles</h2>
             <ul>
               <li><a :href="`https://orcid.org/${profile.orcid}`" target="_blank" rel="noopener">ORCID: {{ profile.orcid }}</a></li>
               <li v-for="l in profile.links" :key="l.url"><a :href="l.url" target="_blank" rel="noopener">{{ l.label }}</a></li>
             </ul>
-          </div>
+          </div> -->
         </aside>
       </div>
     </main>
